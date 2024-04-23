@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	test "github.com/stephen10121/iframe-test/iframetest"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	app := test.App{
+		Path: "./routes",
+		Port: "9000",
+	}
+
+	app.Run()
 }
