@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/stephen10121/iframe-test/project"
+	"github.com/stephen10121/filehttprouter/project"
 )
 
 func FilePathWalkDir(root string) ([]string, error) {
@@ -25,13 +25,6 @@ func FilePathWalkDir(root string) ([]string, error) {
 	return files, err
 }
 
-type Config struct {
-	// This is the path of the route based directory. The default path is ./app
-	Path string
-	// This sets the port of the server. Default port is 8080
-	Port string
-}
-
 type App struct {
 	// This is the path of the route based directory. The default path is ./app
 	Path string
@@ -40,7 +33,6 @@ type App struct {
 }
 
 func (config App) Run() {
-
 	root := "./app"
 	if len(config.Path) > 0 {
 		root = config.Path
