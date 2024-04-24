@@ -25,11 +25,20 @@ func FilePathWalkDir(root string) ([]string, error) {
 	return files, err
 }
 
+type CustomRoute struct {
+	// This is where the api endpoint is. For example "/api/helloWorld". Warning if you have an endpoint that conflicts with the folder routed endpoint, this endpoint will overide the folder routed endpoint.
+	Endpoint string
+	// This is the function that handles the http request.
+	Handler func(http.ResponseWriter, *http.Request)
+}
+
 type App struct {
 	// This is the path of the route based directory. The default path is ./app
 	Path string
 	// This sets the port of the server. Default port is 8080
 	Port string
+	// If you need a route that requires more than just a json file, use this.
+	CustomRoutes []CustomRoute
 }
 
 func (config App) Run() {
@@ -88,6 +97,12 @@ func (config App) Run() {
 			asString := buf.String()
 			fmt.Fprint(w, asString)
 		})
+	}
+
+	if len(config.CustomRoutes) > 0 {
+		for _, route := range config.CustomRoutes {
+			http.HandleFunc(route.Endpoint, route.Handler)
+		}
 	}
 
 	fmt.Println("Running server on port", port)
