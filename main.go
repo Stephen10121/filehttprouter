@@ -93,7 +93,7 @@ func (config App) Run() {
 			dirToPath += "/" + splitDirectory[i]
 		}
 
-		http.HandleFunc(dirToPath, func(w http.ResponseWriter, _ *http.Request) {
+		http.HandleFunc(dirToPath, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
 
@@ -109,25 +109,30 @@ func (config App) Run() {
 			io.Copy(&buf2, data2)
 			asString2 := buf2.String()
 
-			is, _ := exists(root + "/layout.html")
-			if is {
-				data, err := os.Open(root + "/layout.html")
+			param1 := r.URL.Query().Get("a")
+			if param1 == "y" {
+				is, _ := exists(root + "/layout.html")
+				if is {
+					data, err := os.Open(root + "/layout.html")
 
-				if err != nil {
-					panic(err)
-				}
+					if err != nil {
+						panic(err)
+					}
 
-				defer data.Close()
+					defer data.Close()
 
-				var buf bytes.Buffer
-				io.Copy(&buf, data)
-				asString := buf.String()
+					var buf bytes.Buffer
+					io.Copy(&buf, data)
+					asString := buf.String()
 
-				if strings.Contains(asString, "<slot />") {
-					asString = strings.Replace(asString, "<slot />", asString2, 1)
-					fmt.Fprint(w, asString)
+					if strings.Contains(asString, "<slot />") {
+						asString = strings.Replace(asString, "<slot />", asString2, 1)
+						fmt.Fprint(w, asString)
+					} else {
+						fmt.Println("<slot /> doesnt exist")
+						fmt.Fprint(w, asString2)
+					}
 				} else {
-					fmt.Println("<slot /> doesnt exist")
 					fmt.Fprint(w, asString2)
 				}
 			} else {
