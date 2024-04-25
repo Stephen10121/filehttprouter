@@ -97,6 +97,18 @@ func (config App) Run() {
 			w.Header().Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
 
+			data2, err := os.Open(file)
+
+			if err != nil {
+				panic(err)
+			}
+
+			defer data2.Close()
+
+			var buf2 bytes.Buffer
+			io.Copy(&buf2, data2)
+			asString2 := buf2.String()
+
 			is, _ := exists(root + "/layout.html")
 			if is {
 				data, err := os.Open(root + "/layout.html")
@@ -111,49 +123,16 @@ func (config App) Run() {
 				io.Copy(&buf, data)
 				asString := buf.String()
 
-				data2, err := os.Open(file)
-
-				if err != nil {
-					panic(err)
-				}
-
-				defer data.Close()
-
-				var buf2 bytes.Buffer
-				io.Copy(&buf2, data2)
-				asString2 := buf2.String()
-
 				if strings.Contains(asString, "<slot />") {
 					asString = strings.Replace(asString, "<slot />", asString2, 1)
 					fmt.Fprint(w, asString)
 				} else {
-					// fmt.Println("<slot /> doesnt exist")
+					fmt.Println("<slot /> doesnt exist")
 					fmt.Fprint(w, asString2)
 				}
-
-				fmt.Println(asString)
+			} else {
+				fmt.Fprint(w, asString2)
 			}
-
-			// data, err := os.Open(file)
-
-			// if err != nil {
-			// panic(err)
-			// }
-
-			// defer data.Close()
-
-			// fi, err := data.Stat()
-			// if err != nil {
-			// Could not obtain stat, handle error
-			// panic(err)
-			// }
-
-			// w.Header().Set("Content-Length", fmt.Sprint(fi.Size()))
-
-			// var buf bytes.Buffer
-			// io.Copy(&buf, data)
-			// asString := buf.String()
-			// fmt.Fprint(w, asString)
 		})
 	}
 
