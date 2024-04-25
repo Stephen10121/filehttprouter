@@ -110,7 +110,7 @@ func (config App) Run() {
 			asString2 := buf2.String()
 
 			param1 := r.URL.Query().Get("a")
-			if param1 == "y" {
+			if param1 != "y" {
 				is, _ := exists(root + "/layout.html")
 				if is {
 					data, err := os.Open(root + "/layout.html")
