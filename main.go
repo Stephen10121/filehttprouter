@@ -32,13 +32,22 @@ type CustomRoute struct {
 	Handler func(http.ResponseWriter, *http.Request)
 }
 
+type StaticPath struct {
+	// The path of the static folder.
+	DirectoryPath string
+	// The api endpoint for the static files. Excample: /static/
+	EndpointPath string
+}
+
 type App struct {
 	// This is the path of the route based directory. The default path is ./app
 	Path string
 	// This sets the port of the server. Default port is 8080
 	Port string
-	// If you need a route that requires more than just a json file, use this.
+	// If you need a route that requires more than just an index.html file, use this.
 	CustomRoutes []CustomRoute
+	// This configures the static folder and its api endpoint
+	StaticDirectory StaticPath
 }
 
 func (config App) Run() {
@@ -103,6 +112,11 @@ func (config App) Run() {
 		for _, route := range config.CustomRoutes {
 			http.HandleFunc(route.Endpoint, route.Handler)
 		}
+	}
+
+	// Setting the static folder and the endpoint if the user specified one.
+	if config.StaticDirectory.DirectoryPath != "" && config.StaticDirectory.EndpointPath != "" {
+		http.Handle(config.StaticDirectory.EndpointPath, http.FileServer(http.Dir(config.StaticDirectory.DirectoryPath)))
 	}
 
 	fmt.Println("Running server on port", port)
