@@ -67,16 +67,14 @@ func CustomEndpoint(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(p)
 }
 
-var myCustomRoutes = []filehttprouter.CustomRoute{
-	{
-		Endpoint: "/custom",
-		Handler:  CustomEndpoint,
-	},
-}
-
 func main() {
 	app := filehttprouter.App{
-		CustomRoutes:    myCustomRoutes,
+		CustomRoutes:    []filehttprouter.CustomRoute{
+            {
+                Endpoint: "/custom",
+                Handler:  CustomEndpoint,
+            },
+        },
 	}
 
 	app.Run()
