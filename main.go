@@ -116,7 +116,8 @@ func (config App) Run() {
 
 	// Setting the static folder and the endpoint if the user specified one.
 	if config.StaticDirectory.DirectoryPath != "" && config.StaticDirectory.EndpointPath != "" {
-		http.Handle(config.StaticDirectory.EndpointPath, http.FileServer(http.Dir(config.StaticDirectory.DirectoryPath)))
+		fs := http.FileServer(http.Dir(config.StaticDirectory.DirectoryPath))
+		http.Handle(config.StaticDirectory.EndpointPath, http.StripPrefix(config.StaticDirectory.EndpointPath, fs))
 	}
 
 	fmt.Println("Running server on port", port)
