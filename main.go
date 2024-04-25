@@ -50,6 +50,18 @@ type App struct {
 	StaticDirectory StaticPath
 }
 
+// exists returns whether the given file or directory exists
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
 func (config App) Run() {
 	root := "./app"
 	if len(config.Path) > 0 {
@@ -85,26 +97,63 @@ func (config App) Run() {
 			w.Header().Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
 
-			data, err := os.Open(file)
+			is, _ := exists(root + "/layout.html")
+			if is {
+				data, err := os.Open(root + "/layout.html")
 
-			if err != nil {
-				panic(err)
+				if err != nil {
+					panic(err)
+				}
+
+				defer data.Close()
+
+				var buf bytes.Buffer
+				io.Copy(&buf, data)
+				asString := buf.String()
+
+				data2, err := os.Open(file)
+
+				if err != nil {
+					panic(err)
+				}
+
+				defer data.Close()
+
+				var buf2 bytes.Buffer
+				io.Copy(&buf2, data2)
+				asString2 := buf2.String()
+
+				if strings.Contains(asString, "<slot />") {
+					asString = strings.Replace(asString, "<slot />", asString2, 1)
+					fmt.Fprint(w, asString)
+				} else {
+					// fmt.Println("<slot /> doesnt exist")
+					fmt.Fprint(w, asString2)
+				}
+
+				fmt.Println(asString)
 			}
 
-			defer data.Close()
+			// data, err := os.Open(file)
 
-			fi, err := data.Stat()
-			if err != nil {
-				// Could not obtain stat, handle error
-				panic(err)
-			}
+			// if err != nil {
+			// panic(err)
+			// }
 
-			w.Header().Set("Content-Length", fmt.Sprint(fi.Size()))
+			// defer data.Close()
 
-			var buf bytes.Buffer
-			io.Copy(&buf, data)
-			asString := buf.String()
-			fmt.Fprint(w, asString)
+			// fi, err := data.Stat()
+			// if err != nil {
+			// Could not obtain stat, handle error
+			// panic(err)
+			// }
+
+			// w.Header().Set("Content-Length", fmt.Sprint(fi.Size()))
+
+			// var buf bytes.Buffer
+			// io.Copy(&buf, data)
+			// asString := buf.String()
+			// fmt.Fprint(w, asString)
 		})
 	}
 
